@@ -170,10 +170,6 @@ if video_path:
 else:
     st.info("⬆️ Please upload a video file or provide a YouTube link to begin analysis.")
 
-# Footer
-st.markdown("---")
-st.markdown('<div class="center">Made with ❤️ by Akram Mohammad</div>', unsafe_allow_html=True)
-import streamlit as st
 import io
 import json
 from googleapiclient.discovery import build
@@ -219,3 +215,6 @@ if st.button("🚀 Deliver to Client's Google Drive"):
     result = save_to_google_drive(ai_final_post, "LinkedIn_Draft_Today")
     st.success(result)
 
+# Footer
+st.markdown("---")
+st.markdown('<div class="center">Made with ❤️ by Korewole Onire</div>', unsafe_allow_html=True)
