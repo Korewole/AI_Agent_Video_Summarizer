@@ -173,3 +173,49 @@ else:
 # Footer
 st.markdown("---")
 st.markdown('<div class="center">Made with ❤️ by Akram Mohammad</div>', unsafe_allow_html=True)
+import streamlit as st
+import io
+import json
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
+from google.oauth2 import service_account
+
+def save_to_google_drive(content, file_name):
+    """
+    This function takes your AI text and saves it as a Google Doc.
+    """
+    # 1. Access the "Key" (either from a file or Streamlit Secrets)
+    # If using Streamlit Secrets, you'd use st.secrets["GCP_SERVICE_ACCOUNT"]
+    try:
+        # For testing locally, just use the file
+        creds_info = json.load(open("service_account.json"))
+        creds = service_account.Credentials.from_service_account_info(
+            creds_info, 
+            scopes=['https://www.googleapis.com/auth/drive']
+        )
+        service = build('drive', 'v3', credentials=creds)
+
+        # 2. File Settings
+        folder_id = "PASTE_YOUR_CLIENTS_FOLDER_ID_HERE" # The ID is the long string at the end of the Folder URL
+        file_metadata = {
+            'name': file_name,
+            'parents': [folder_id],
+            'mimeType': 'application/vnd.google-apps.document' 
+        }
+
+        # 3. Perform the Upload
+        fh = io.BytesIO(content.encode('utf-8'))
+        media = MediaIoBaseUpload(fh, mimetype='text/plain', resumable=True)
+        file = service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        
+        return f"Success! File created with ID: {file.get('id')}"
+    
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+# --- BUTTON IN YOUR UI ---
+if st.button("🚀 Deliver to Client's Google Drive"):
+    # ai_final_post is the text from your LinkedIn logic
+    result = save_to_google_drive(ai_final_post, "LinkedIn_Draft_Today")
+    st.success(result)
+
